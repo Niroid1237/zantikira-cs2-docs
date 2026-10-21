@@ -40,25 +40,25 @@ theme:
         name: Тёмная тема
 
 nav:
-  - Обзор: index.md
-  - Начало работы:
-      - Установка: start/installation.md
-      - Быстрый старт: start/quickstart.md
+  - Overview: index.md
+  - Getting started:
+      - Installation: start/installation.md
+      - Quickstart: start/quickstart.md
   - API:
-      - События: api/events.md
-      - cmd: api/command.md
-      - Сущности: api/entitylist.md
-      - trace: api/trace.md
-      - engine: api/engine.md
-      - Математика: api/math.md
-      - Рендер: api/render.md
-      - Окна: api/ui.md
-      - Настройки: api/settings.md
-      - Глобальные таблицы: api/globals.md
-  - Примеры: examples.md
-  - Безопасность: security.md
-  - Ограничения: limits.md
-  - Модули API: roadmap.md
+      - Events: api/events.md
+      - Command: api/command.md
+      - Entity list: api/entitylist.md
+      - Trace: api/trace.md
+      - Engine: api/engine.md
+      - Math: api/math.md
+      - Render: api/render.md
+      - UI: api/ui.md
+      - Settings: api/settings.md
+      - Globals: api/globals.md
+  - Examples: examples.md
+  - Security: security.md
+  - Limits: limits.md
+  - Roadmap: roadmap.md
 
 plugins:
   - search:
