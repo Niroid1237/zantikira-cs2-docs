@@ -1,4 +1,4 @@
-# Пользовательские окна
+# ui
 
 `z.ui` — immediate-mode API в стиле ImGui поверх существующего `xui`. Это не
 второй Dear ImGui context: окна используют текущий рендер, тему, clipping и

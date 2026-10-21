@@ -1,28 +1,33 @@
 # ZantiKira Lua API
 
-LuaJIT 2.1 · FFI · один state на скрипт
+LuaJIT 2.1 · FFI по умолчанию выключен · один state на скрипт
 
-API для CS2-чита ZantiKira. Скрипты запускаются только из явного списка в
-активном конфиге, без сканирования папки и без облака.
+API для CS2-чита ZantiKira, версия **0.7.0**. Скрипты запускаются только из
+явного списка в активном конфиге, без сканирования папки и без облака.
 
-!!! warning "FFI — это полный доступ к процессу"
-    При включённом FFI скрипт может читать и писать память, вызывать
-    `LoadLibrary`, `MessageBoxA` и любые другие native-функции. Запускай только
-    свой код или код, которому полностью доверяешь.
+!!! warning "Скрипт — это код в процессе игры"
+    FFI даёт прямой доступ к памяти и native-функциям. Даже без FFI доступны
+    сеть, чтение файлов как ассетов, произвольные клиентские команды и запись
+    настроек чита. Запускай только свой код или код, которому полностью
+    доверяешь.
 
-## Что уже доступно
+## Что доступно
 
 | Section | Features |
 |---|---|
 | [Events](api/events.md) | `create_move`, `paint`, `ui`, `shutdown` |
 | [Command](api/command.md) | кнопки, view angles, forward/left/up move, номер команды, tick |
-| [Entity list](api/entitylist.md) | снимки локального игрока и живых игроков, motion-история по тикам |
+| [Entity list](api/entitylist.md) | живые игроки, все не-игровые сущности, кости, хитбоксы, видимость, motion-история |
+| [Combat](api/combat.md) | autowall, lag compensation records, backtrack-снимки |
 | [Trace](api/trace.md) | луч и hull с fraction, позицией, нормалью и индексом игрока |
-| [Engine](api/engine.md) | `is_connected`, `is_in_game`, `client_cmd` |
+| [Engine](api/engine.md) | состояние движка, client commands, prediction |
 | [Math](api/math.md) | векторы, углы, FOV, distance |
-| [Render](api/render.md) | прямоугольники, линии, круги, текст, `world_to_screen`, размеры экрана |
+| [Render](api/render.md) | примитивы, градиенты, blur, clip, изображения, шрифты, draw-list, deferred render |
+| [Assets](api/assets.md) | PNG/GIF/SVG, пользовательские шрифты, image/font-токены |
+| [Network](api/network.md) | синхронный HTTP, DNS, TCP, UDP |
 | [UI](api/ui.md) | ImGui-подобные окна, checkbox, slider, combo, text input, кнопки |
-| [Settings](api/settings.md) | чтение и запись primitive-настроек по `category, name` |
+| [Settings](api/settings.md) | primitive- и custom-поля: скины, агенты, список скриптов |
+| [Scripts](api/scripts.md) | перезагрузка, папка скриптов |
 | [Globals](api/globals.md) | `z.api`, `z.globals`, `z.time`, `z.buttons`, `z.log`, `print` |
 | FFI | `require("ffi")` только при включённом чекбоксе |
 
@@ -66,22 +71,25 @@ create_move:
   → input apply
 
 frame:
-  встроенные оверлеи
+  → deferred Lua draw (то, что вызвано вне paint)
+  → reload, если он был запрошен
   → Lua paint
-  → widgets / меню
+  → меню и виджеты xdraw
 ```
 
-`paint` — единственное место, где работает `z.render`. `cmd` живёт только
-до возврата из `create_move`.
+`z.render` работает и вне `paint`: команды уходят в отложенный список и
+появляются в начале следующего `on_present`. `cmd` живёт только до возврата из
+`create_move`.
 
-## Ограничения P0
+## Документация
 
-Сейчас есть снимки игроков, короткая история по тикам и trace-луч/hull, но нет
-полного списка не-игровых сущностей, костей/хитбоксов, engine prediction,
-autowall/backtrack и HTTP. Это сознательно: сначала стабильный
-movement/render/log слой, потом остальное.
-Полный список — в разделе [ограничения](limits.md), порядок модулей — в
-[плане](roadmap.md).
+- [Установка](start/installation.md) — папка скриптов, список, FFI.
+- [API](api/events.md) — модули `z.*`.
+- [Примеры](examples.md) — готовые сценарии.
+- [Безопасность](security.md) — что реально доступно скрипту.
+- [Ограничения](limits.md) — практические границы, а не искусственные лимиты.
+
+Публичная копия: <https://niroid1237.github.io/zantikira-cs2-docs/>.
 
 ## Локальный просмотр сайта
 
@@ -90,10 +98,8 @@ pip install -r requirements-docs.txt
 mkdocs serve
 ```
 
-Сайт откроется на `http://127.0.0.1:8000`. Для GitHub Pages добавлен workflow
-`.github/workflows/docs.yml`: пуш в `main` или `master` собирает и публикует
-`site/`.
+Сайт откроется на `http://127.0.0.1:8000`. Продакшен-сборка:
 
-В GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**,
-затем пуш в `main`/`master`. Если репозиторий называется иначе, при желании
-раскомментируй `site_url` в `mkdocs.yml` и подставь свой адрес.
+```bash
+python -m mkdocs build --strict
+```

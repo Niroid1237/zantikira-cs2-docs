@@ -14,7 +14,7 @@ end)
 
 ## Кнопки
 
-| Метод | Возврат | Описание |
+| Method | Return | Description |
 |---|---|---|
 | `cmd:get_button(mask)` | boolean | установлен ли бит |
 | `cmd:set_button(mask, pressed)` | nil | поставить/снять один бит |
@@ -39,7 +39,7 @@ cmd:set_buttons(bits)
 
 ## View angles
 
-| Метод | Возврат | Описание |
+| Method | Return | Description |
 |---|---|---|
 | `cmd:get_view_angles()` | table или nil | `pitch`, `yaw`, `roll` |
 | `cmd:set_view_angles(pitch, yaw[, roll])` | nil | записать углы и подвинуть камеру |
@@ -65,7 +65,7 @@ local pitch, yaw, roll = a.pitch, a.yaw, a.roll
 
 ## Движение
 
-| Метод | Возврат | Описание |
+| Method | Return | Description |
 |---|---|---|
 | `cmd:get_forward_move()` | number | forwardmove |
 | `cmd:get_left_move()` | number | leftmove |
@@ -85,7 +85,7 @@ subtick-обнуление base movement пропускается; встрое�
 
 ## Команда и tick
 
-| Метод | Возврат | Описание |
+| Method | Return | Description |
 |---|---|---|
 | `cmd:get_command_number()` | integer | номер команды |
 | `cmd:get_tick()` | integer | client tick из base-сообщения |

@@ -1,31 +1,166 @@
 # entitylist
 
-`z.entitylist` отдаёт **снимки** данных игроков. Это обычные Lua-таблицы, а не
-сырые указатели на игровые сущности: их можно сохранить, передать в другую
-функцию или прочитать несколько раз. Данные в таблице не обновляются сами —
-каждый вызов создаёт новый снимок.
+`z.entitylist` отдаёт **снимки** игрового мира. Это обычные Lua-таблицы, а не
+сырые указатели на сущности: их можно сохранить, передать в другую функцию или
+прочитать несколько раз. Данные в таблице не обновляются сами — каждый вызов
+создаёт новый снимок.
 
-## z.entitylist.players()
+Сырые pawn/controller-указатели, handle-ы и адреса через этот API не отдаются.
+
+## Игроки
+
+### z.entitylist.players()
 
 ```lua
 local players = z.entitylist.players()
 for _, player in ipairs(players) do
-    z.log(player.index, player.name, player.health, player.velocity)
+    z.log(player.index, player.name, player.health, player.local)
 end
 ```
 
-Возвращает массив живых игроков. Пустой массив, если игроков нет. Если
-локальный игрок жив, он тоже входит в список и отмечен полем `local = true`.
-
-Список отсортирован по `index` — индексу controller-сущности. Это не индекс
-pawn и не номер слота в scoreboard. В таблице есть только значения, скопированные
-из памяти; указатели и handle-ы наружу не отдаются.
+Возвращает массив **живых** игроков, отсортированный по `index` controller-
+сущности. Пустой массив, если игроков нет. Локальный игрок входит в список и
+отмечен `local = true`.
 
 Живым считается controller с `m_bPawnIsAlive` и pawn с `health > 0`. Мёртвые
-игроки в список не попадают. Для наблюдаемого игрока в observer-режиме используй
-`local_player()`: `players()` возвращает обычных живых игроков.
+игроки и наблюдаемый pawn в observer-режиме в `players()` не попадают; для
+наблюдаемого используй `local_player()`.
 
-## z.entitylist.history(index, limit?)
+`index` — индекс controller-сущности, а не pawn и не номер слота в scoreboard.
+
+### z.entitylist.local_player()
+
+```lua
+local me = z.entitylist.local_player()
+if me and me.alive then
+    z.log(me.name, me.health, me.weapon)
+end
+```
+
+Возвращает снимок или `nil`, если controller/pawn ещё недоступны. Если игрок
+мёртв и находится в observer-режиме, таблица описывает наблюдаемый pawn, а
+`observer = true`.
+
+Снимок `local_player()` использует те же поля, что и элементы `players()`, но
+без `index`, `local`, `is_player`, `type` и `schema`.
+
+### Поля снимка игрока
+
+| Field | Type | Description |
+|---|---|---|
+| `index` | integer | controller index; только у `players()` и `entity()` |
+| `local` | boolean | это локальный игрок; только у `players()` и `entity()` |
+| `alive` | boolean | игрок жив |
+| `observer` | boolean | активен observer-режим |
+| `scoped` | boolean | оружие в режиме прицеливания |
+| `health` | integer | здоровье; `0`, если недоступно |
+| `team` | integer | номер команды; `0`, если неизвестно |
+| `armor` | integer | броня; `0`, если недоступно |
+| `ping` | integer | ping из controller; `0`, если недоступно |
+| `name` | string или nil | санитизированное имя |
+| `weapon` | string или nil | активное оружие без префикса `weapon_` |
+| `weapon_id` | integer | item definition index; `0`, если неизвестно |
+| `ammo` | integer | патроны в текущем магазине |
+| `max_ammo` | integer | размер магазина; `0`, если недоступно |
+| `origin` | vector или nil | абсолютная позиция pawn |
+| `eye_position` | vector или nil | позиция глаз с учётом view offset |
+| `velocity` | vector или nil | сетевая скорость `m_vecVelocity` |
+| `abs_velocity` | vector или nil | абсолютная скорость `m_vecAbsVelocity` |
+| `flags` | integer | сырые флаги `m_fFlags`; `0`, если недоступно |
+| `on_ground` | boolean | флаг `FL_ONGROUND` |
+| `ducking` | boolean | флаг `FL_DUCKING` |
+| `sim_time` | number или nil | `m_flSimulationTime` в секундах |
+
+Векторы имеют формат `{ x, y, z }` и индексы `[1]`, `[2]`, `[3]`. Поля
+`origin`, `eye_position`, `velocity`, `abs_velocity`, `name`, `weapon` и
+`sim_time` могут отсутствовать — проверяй их на `nil`.
+
+## Не-игровые сущности
+
+### z.entitylist.all([include_players])
+
+```lua
+local entities = z.entitylist.all()
+for _, entity in ipairs(entities) do
+    z.log(entity.index, entity.type, entity.schema)
+end
+```
+
+Возвращает все закэшированные не-игровые сущности: оружие, предметы, гранаты,
+снаряды, двери и прочие объекты со схемой. По умолчанию player controller и
+player pawn исключены.
+
+`include_players = true` добавляет живых игроков **после** остальных записей, в
+порядке controller index. Для чистого списка игроков используй `players()`.
+
+`z.entitylist.entities()` — алиас `all()`.
+
+### z.entitylist.items()
+
+```lua
+for _, item in ipairs(z.entitylist.items()) do
+    z.log(item.index, item.schema)
+end
+```
+
+Только сущности типа `item`: мировое оружие, ножи, гранаты в инвентаре и
+предметы. Игроки и снаряды исключены.
+
+### z.entitylist.projectiles()
+
+Только летящие снаряды: гранаты, `C_Inferno` и другие projectile-сущности.
+
+### z.entitylist.others()
+
+Всё, что не попало в `item`, `projectile` и `player`: двери, world props и
+прочие объекты со схемой.
+
+### z.entitylist.entity(index)
+
+```lua
+local entity = z.entitylist.entity(42)
+if entity then
+    z.log(entity.type, entity.schema, entity.origin)
+end
+```
+
+Ищет закэшированную сущность по `index`. Для игрока возвращает снимок игрока,
+для остальных — общий снимок сущности. Если индекс не найден — `nil`.
+
+`z.entitylist.get()` — алиас `entity()`.
+
+### Поля снимка сущности
+
+| Field | Type | Description |
+|---|---|---|
+| `index` | integer | индекс сущности |
+| `type` | string | `item`, `projectile`, `other` или `player` |
+| `type_id` | integer | числовой id типа |
+| `is_player` | boolean | это player controller |
+| `schema` | string или nil | имя схемы сущности |
+| `pawn_schema` | string или nil | схема pawn, если известна |
+| `health` | integer | `m_iHealth`; `0`, если недоступно |
+| `alive` | boolean | `health > 0` |
+| `team` | integer | команда; `0`, если неизвестно |
+| `flags` | integer | `m_fFlags` |
+| `on_ground` | boolean | `FL_ONGROUND` |
+| `ducking` | boolean | `FL_DUCKING` |
+| `dormant` | boolean или nil | `m_bDormant`, если scene node доступен |
+| `origin` | vector или nil | позиция pawn/сущности |
+| `eye_position` | vector или nil | позиция глаз, если применимо |
+| `velocity` | vector или nil | скорость |
+| `abs_velocity` | vector или nil | абсолютная скорость |
+| `sim_time` | number или nil | simulation time |
+
+У не-игровых сущностей нет `name`, `weapon`, `ammo` и `ping`. Это поля
+player-снимка, а не общие свойства любой сущности.
+
+Списки создаются из кэша `systems::g_entities` и сортируются по `index`.
+Кэш обновляется движком чита; API не хранит ссылки на его элементы.
+
+## История движения
+
+### z.entitylist.history(index, limit?)
 
 ```lua
 local samples = z.entitylist.history(player.index, 16)
@@ -34,18 +169,16 @@ for _, sample in ipairs(samples) do
 end
 ```
 
-Возвращает массив motion-снимков одного игрока, от старых к новым. `index` —
-controller index из `players()`, `limit` — от 1 до 64, по умолчанию 16. Если
-истории нет, возвращается пустая таблица.
+Возвращает motion-снимки одного живого игрока от старых к новым. `index` —
+controller index из `players()`. `limit` — от `1` до `64`, по умолчанию `16`.
+Если истории нет, возвращается пустая таблица.
 
-История собирается автоматически один раз за `create_move`, пока включён
-scripting. В неё попадают только живые игроки. Снимки живут в памяти до
-выключения/перезагрузки чита; на диск ничего не пишется. В меню и вне игры
-новые снимки не появляются. При смене локального или наблюдаемого pawn история
-сбрасывается, а снимки старого pawn с тем же index не возвращаются после
-респавна.
+История собирается автоматически раз в `create_move`, пока включён scripting.
+В неё попадают только живые игроки. Снимки живут в памяти до выключения,
+перезагрузки чита или смены локального/наблюдаемого pawn. На диск ничего не
+пишется.
 
-| Поле | Тип | Описание |
+| Field | Type | Description |
 |---|---|---|
 | `index` | integer | controller index |
 | `tick` | integer | tick/command number снимка; `0`, если недоступно |
@@ -62,117 +195,119 @@ scripting. В неё попадают только живые игроки. Сн
 | `sim_time` | number или nil | `m_flSimulationTime` |
 
 В history нет имени, оружия, брони и ping: это лёгкие motion-снимки. Для
-текущего состояния используй `players()`.
+текущего состояния используй `players()`, для lag compensation — `z.combat`.
 
-## z.entitylist.local_player()
+## Кости
+
+### z.entitylist.bones(index)
 
 ```lua
-local player = z.entitylist.local_player()
-if player and player.alive then
-    z.log(player.name, player.health, player.weapon)
+for _, bone in ipairs(z.entitylist.bones(player.index)) do
+    z.log(bone.id, bone.name, bone.position)
 end
 ```
 
-Возвращает таблицу или `nil`, если локальный controller и pawn ещё недоступны.
-Если игрок мёртв и находится в observer-режиме, таблица описывает наблюдаемого
-pawn, а поле `observer` равно `true`.
+Возвращает массив всех доступных костей сущности. `index` — controller index
+живого игрока, индекс живого player-pawn или индекс не-игровой сущности.
+Элементы идут по bone id: `bone.id` совпадает с позицией в массиве (с нуля),
+поэтому массив начинается с `[1]`, а `id` первого элемента — `0`.
 
-## Поля снимка
+Кость:
 
-| Поле | Тип | Описание |
+| Field | Type | Description |
 |---|---|---|
-| `index` | integer | индекс controller-сущности; только у `players()` |
-| `local` | boolean | это локальный игрок; только у `players()` |
-| `alive` | boolean | игрок жив; у `local_player()` отражает локального игрока |
-| `observer` | boolean | активен observer-режим; у `players()` всегда `false` |
-| `scoped` | boolean | оружие в режиме прицеливания |
-| `health` | integer | здоровье; `0`, если недоступно |
-| `team` | integer | номер команды; `0`, если неизвестно |
-| `armor` | integer | броня; `0`, если недоступно |
-| `ping` | integer | ping из controller; `0`, если недоступно |
-| `name` | string или nil | санитизированное имя игрока |
-| `weapon` | string или nil | имя активного оружия без префикса `weapon_` |
-| `weapon_id` | integer | item definition index; `0`, если оружие неизвестно |
-| `ammo` | integer | патроны в текущем магазине |
-| `max_ammo` | integer | размер магазина; `0`, если недоступно |
-| `origin` | vector или nil | абсолютная позиция pawn |
-| `eye_position` | vector или nil | позиция глаз с учётом view offset |
-| `velocity` | vector или nil | сетевая скорость `m_vecVelocity` |
-| `abs_velocity` | vector или nil | абсолютная скорость `m_vecAbsVelocity` |
-| `flags` | integer | сырые флаги `m_fFlags`; `0`, если недоступно |
-| `on_ground` | boolean | флаг `FL_ONGROUND` |
-| `ducking` | boolean | флаг `FL_DUCKING` |
-| `sim_time` | number или nil | `m_flSimulationTime` в секундах |
+| `id` | integer | bone id |
+| `name` | string или nil | известное имя (`head`, `neck`, `spine_1`, ...) |
+| `position` | vector | позиция в мире |
+| `scale` | number | scale кости |
+| `rotation` | quaternion | `{ x, y, z, w }` |
 
-Векторы имеют тот же формат, что и в `z.math`: `{ x, y, z }` и индексы
-`[1]`, `[2]`, `[3]`. Поля `origin`, `eye_position`, `velocity`, `abs_velocity`
-и `sim_time` могут отсутствовать, если соответствующие данные ещё не готовы.
-Проверяй их на `nil` перед использованием.
+Для неизвестного id поле `name` отсутствует. Кости читаются через безопасные
+чтения; при недоступной модели возвращается пустая таблица.
 
-`velocity` и `abs_velocity` — это скорость в игровых единицах в секунду.
-`sim_time` удобно использовать для оценки интервала между снимками. `flags`
-можно читать целиком, а `on_ground` и `ducking` уже вычислены для типичных
-проверок.
+### z.entitylist.bone(index[, bone])
 
-## Своя экстраполяция
+Возвращает одну кость. `bone` — числовой id `0..65535` или известное имя:
+`pelvis`, `spine_1..spine_4`, `neck`, `head`, `left_clavicle`,
+`left_shoulder`, `left_elbow`, `left_hand`, `right_clavicle`,
+`right_shoulder`, `right_elbow`, `right_hand`, `left_hip`, `left_knee`,
+`left_foot`, `right_hip`, `right_knee`, `right_foot`.
 
-`players()` даёт данные, но не выполняет prediction за тебя. Простую линейную
-оценку можно сделать в Lua:
+По умолчанию `head`. Если сущность не найдена — `nil`. Если id вне диапазона
+или имя неизвестно — ошибка Lua.
+
+### z.entitylist.bone_count(index)
+
+Возвращает число доступных костей или `0`.
+
+## Хитбоксы
+
+### z.entitylist.hitboxes(index)
 
 ```lua
-local history = {}
-
-z.events.create_move:add(function()
-    for _, player in ipairs(z.entitylist.players()) do
-        local prev = history[player.index]
-        if prev and prev.sim_time and player.origin and player.velocity and player.sim_time
-            and player.sim_time > prev.sim_time then
-            local dt = player.sim_time - prev.sim_time
-            if dt > 0 and dt <= 0.25 then
-                local predicted = {
-                    x = player.origin.x + player.velocity.x * dt,
-                    y = player.origin.y + player.velocity.y * dt,
-                    z = player.origin.z + player.velocity.z * dt,
-                }
-                -- predicted — только оценка; коллизии и оружие здесь не учитываются
-            end
-        end
-
-        history[player.index] = {
-            sim_time = player.sim_time,
-        }
-    end
-end)
+for _, hitbox in ipairs(z.entitylist.hitboxes(player.index)) do
+    z.log(hitbox.index, hitbox.hitgroup_name, hitbox.origin)
+end
 ```
 
-Для сложной экстраполяции нужны trace, netvars/cvars, кости и история чужих
-игроков. Этого в `z.entitylist` пока нет: API не притворяется полноценным
-engine prediction. FFI не даёт готовых оффсетов или масок; собственный native-код
-на FFI — полностью твоя ответственность.
+Возвращает массив хитбоксов модели. Это данные hitbox set, а не готовые
+попадания trace.
 
-Имя в observer-режиме относится к наблюдаемому игроку. Не считай его именем
-локального аккаунта.
+| Field | Type | Description |
+|---|---|---|
+| `index` | integer | индекс хитбокса в наборе |
+| `bone` | integer | bone id, к которому привязан хитбокс |
+| `hitgroup` | integer | hitgroup |
+| `hitgroup_name` | string | имя hitgroup |
+| `mins` | vector | локальные mins OBB/капсулы |
+| `maxs` | vector | локальные maxs |
+| `radius` | number | радиус капсулы |
+| `shape` | integer | shape type из hitbox set |
+| `translation_only` | boolean | флаг translation-only |
+| `origin` | vector или nil | центр хитбокса в мире |
 
-## Алиасы
+`origin` вычисляется как центр локального OBB, повёрнутый кватернионом кости и
+сложенный с её позицией. Для капсулы это локальный центр между `mins` и
+`maxs`; радиус отдельно. Углы OBB и точная геометрия капсулы не возвращаются.
+
+### z.entitylist.hitbox(index, hitbox_index)
+
+Возвращает один хитбокс или `nil`. Поля те же, кроме `shape` и
+`translation_only` — одиночный вариант их не отдаёт.
+
+## Видимость
+
+### z.entitylist.visible(index[, bone])
 
 ```lua
-z.entitylist.get_local_player()      -- то же, что local_player()
-z.entitylist.get_local_player_pawn() -- то же, что local_player()
+local tr = z.entitylist.visible(player.index, "head")
 ```
 
-`get_local_player_pawn()` возвращает такую же таблицу, а не pointer. Сырые
-указатели через этот API не отдаются.
+Проверяет видимость точки кости из глаза локального/наблюдаемого pawn. По
+умолчанию используется `head`. Возвращает `boolean`, а не таблицу trace.
+
+- Если кость не найдена, используется `eye_position`, затем `origin`.
+- Если trace-менеджер или глаз камеры ещё не готовы, возвращается `false`.
+- В observer-режиме старт — глаз наблюдаемого pawn.
+- `z.entitylist.can_see()` — алиас.
+
+### z.entitylist.visible_hitbox(index, hitbox_index)
+
+Проверяет видимость **центра** конкретного хитбокса. Это не проверка всех
+углов OBB; для полной проверки используй собственные точки и `z.trace.line`.
 
 ## Удобные функции
 
 ```lua
-z.entitylist.get_local_player_name()  -- string или nil
-z.entitylist.get_local_weapon()       -- table или nil
-z.entitylist.get_local_weapon_name()  -- string или nil
-z.entitylist.get_local_weapon_index() -- integer или nil
+z.entitylist.get_local_player()      -- local_player()
+z.entitylist.get_local_player_pawn() -- local_player()
+z.entitylist.get_local_player_name() -- string или nil
+z.entitylist.get_local_weapon()      -- table или nil
+z.entitylist.get_local_weapon_name() -- string или nil
+z.entitylist.get_local_weapon_index()-- integer или nil
 ```
 
-`get_local_weapon()` возвращает таблицу:
+`get_local_weapon()` возвращает:
 
 ```lua
 {
@@ -183,33 +318,30 @@ z.entitylist.get_local_weapon_index() -- integer или nil
 }
 ```
 
-Если активного оружия нет, возвращается `nil`. `get_local_weapon_index()`
-возвращает `nil`, когда оружие неизвестно.
+Если активного оружия нет, возвращается `nil`.
 
-## Пример
+## Пример: ESP-подобный список
 
 ```lua
 z.events.paint:add(function()
-    local player = z.entitylist.local_player()
-    if not player or not player.alive then
-        return
+    for _, player in ipairs(z.entitylist.players()) do
+        if not player.local and player.origin then
+            local x, y = z.render.world_to_screen(player.origin)
+            if x and y then
+                local color = { r = 255, g = 80, b = 80, a = 255 }
+                z.render.text(x, y - 18, player.name or "unknown", color)
+                z.render.text(x, y, ("%d hp"):format(player.health), color)
+            end
+        end
     end
-
-    local text = ("%s | %d hp | %s"):format(
-        player.name or "unknown",
-        player.health,
-        player.weapon or "none"
-    )
-
-    z.render.rect_filled(20, 20, 260, 34, {
-        r = 12, g = 12, b = 18, a = 220
-    }, 5)
-    z.render.text(30, 29, text, {
-        r = 235, g = 235, b = 245, a = 255
-    })
 end)
 ```
 
-Чтение снимка не требует FFI. Если FFI включён, таблица всё равно остаётся
-обычной копией данных; для более глубокого доступа к памяти используй
-собственный FFI-код на свой риск.
+## Ограничения
+
+- `players()` не возвращает мёртвых и наблюдаемого игрока.
+- `all()` не сортирует игроков вместе с остальными: они добавляются в конец.
+- `history()` ограничена `64` последними тиками и текущим pawn.
+- Кости и хитбоксы могут быть недоступны для dormant/неигровых сущностей.
+- `visible()` проверяет одну точку; это не autowall и не проверка всего тела.
+- Снимки не обновляются. Не кэшируй их между тиками, если нужна свежая позиция.

@@ -1,9 +1,9 @@
-# Глобальные таблицы
+# globals
 
 ## z.api
 
 ```lua
-z.api.version  -- "0.6.0"
+z.api.version  -- "0.7.0"
 z.api.game     -- "cs2"
 z.api.script   -- абсолютный путь текущего скрипта
 z.api.ffi      -- true, если FFI включён
@@ -25,10 +25,23 @@ z.events.shutdown
 Каждое событие — таблица с методом `:add(fn)`. Подробности:
 [события](events.md).
 
-## z.math
+## Модули API
 
-Векторы, углы, FOV и `world_to_screen`-хелперы. Подробности:
-[математика](math.md).
+| Module | Description |
+|---|---|
+| `z.entitylist` | снимки игроков и сущностей, кости, хитбоксы, видимость, история |
+| `z.combat` | autowall, backtrack-записи |
+| `z.trace` | луч и hull |
+| `z.engine` | состояние движка, client commands, prediction |
+| `z.render` | примитивы, текст, изображения, draw-list |
+| `z.assets` | загрузка изображений, SVG и шрифтов |
+| `z.net` | HTTP, DNS, TCP, UDP |
+| `z.settings` | чтение и запись настроек чита |
+| `z.scripts` | перезагрузка и папка скриптов |
+| `z.ui` | окна и виджеты |
+| `z.math` | векторы, углы, FOV |
+| `z.globals` | состояние кадра |
+| `z.time`, `z.buttons`, `z.log`, `print` | время, кнопки, логи |
 
 ## z.globals
 
@@ -41,7 +54,7 @@ local fps = z.globals.fps()
 local all = z.globals.snapshot()
 ```
 
-| Функция | Возврат | Описание |
+| Function | Return | Description |
 |---|---|---|
 | `z.globals.curtime()` | number или nil | текущее игровое время |
 | `z.globals.tick_count()` | integer или nil | номер тика |
@@ -56,7 +69,7 @@ local all = z.globals.snapshot()
 
 ## z.time
 
-| Функция | Возврат | Описание |
+| Function | Return | Description |
 |---|---|---|
 | `z.time.now()` | number | Unix time в секундах |
 | `z.time.tick()` | number | секунды с запуска Windows |
@@ -67,7 +80,7 @@ local all = z.globals.snapshot()
 
 ## z.buttons
 
-| Поле | Значение | Бит |
+| Field | Value | Bit |
 |---|---:|---:|
 | `attack` | 1 | 0 |
 | `jump` | 2 | 1 |
@@ -101,15 +114,16 @@ print("text")
 
 `z.log` — таблица с `__call`, поэтому её можно вызывать как функцию.
 `print` — алиас информационного лога. Аргументы приводятся к строке и
-соединяются пробелом. Строка обрезается до 2048 символов; в памяти хранится
-последние 256 записей, во вкладке Lua показываются последние 11.
+соединяются пробелом. Искусственного лимита длины сообщения нет; в памяти
+хранятся все записи, во вкладке Lua показываются все текущие записи.
 
 Логи доступны и при загрузке скрипта, и в `create_move`, `paint`, `ui`,
 `shutdown`.
 
 ## z.render
 
-См. [рендер](render.md). Работает только в `paint`.
+См. [render](render.md). Работает в `paint` и вне его: вне `paint` команды
+откладываются до начала следующего кадра.
 
 ## z.ui и z.settings
 

@@ -2,8 +2,9 @@ site_name: ZantiKira Lua API
 site_description: LuaJIT 2.1 + FFI scripting API for ZantiKira CS2
 site_author: ZantiKira
 
-# После создания репозитория GitHub Pages раскомментируй и подставь свой URL.
-# site_url: https://USERNAME.github.io/REPOSITORY/
+site_url: https://niroid1237.github.io/zantikira-cs2-docs/
+repo_url: https://github.com/Niroid1237/zantikira-cs2-docs
+repo_name: Niroid1237/zantikira-cs2-docs
 
 theme:
   name: material
@@ -48,12 +49,16 @@ nav:
       - Events: api/events.md
       - Command: api/command.md
       - Entity list: api/entitylist.md
+      - Combat: api/combat.md
       - Trace: api/trace.md
       - Engine: api/engine.md
       - Math: api/math.md
       - Render: api/render.md
+      - Assets: api/assets.md
+      - Network: api/network.md
       - UI: api/ui.md
       - Settings: api/settings.md
+      - Scripts: api/scripts.md
       - Globals: api/globals.md
   - Examples: examples.md
   - Security: security.md
