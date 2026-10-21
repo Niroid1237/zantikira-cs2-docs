@@ -1,0 +1,89 @@
+site_name: ZantiKira Lua API
+site_description: LuaJIT 2.1 + FFI scripting API for ZantiKira CS2
+site_author: ZantiKira
+
+# После создания репозитория GitHub Pages раскомментируй и подставь свой URL.
+# site_url: https://USERNAME.github.io/REPOSITORY/
+
+theme:
+  name: material
+  language: ru
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Светлая тема
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Тёмная тема
+
+nav:
+  - Обзор: index.md
+  - Начало работы:
+      - Установка: start/installation.md
+      - Быстрый старт: start/quickstart.md
+  - API:
+      - События: api/events.md
+      - cmd: api/command.md
+      - Сущности: api/entitylist.md
+      - trace: api/trace.md
+      - engine: api/engine.md
+      - Математика: api/math.md
+      - Рендер: api/render.md
+      - Окна: api/ui.md
+      - Настройки: api/settings.md
+      - Глобальные таблицы: api/globals.md
+  - Примеры: examples.md
+  - Безопасность: security.md
+  - Ограничения: limits.md
+  - Модули API: roadmap.md
+
+plugins:
+  - search:
+      lang:
+        - ru
+        - en
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra_css:
+  - assets/extra.css
+
+copyright: ZantiKira · LuaJIT 2.1 · FFI
