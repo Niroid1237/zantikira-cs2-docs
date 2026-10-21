@@ -444,19 +444,27 @@ z.trace.hull(start, end, mins, maxs[, options])
 | `z.engine.is_connected()` | boolean | engine client и `global_vars` готовы |
 | `z.engine.is_in_game()` | boolean | есть локальный pawn/observer |
 | `z.engine.client_cmd(command)` | nil | выполнить client command |
-| `z.engine.prestate()` | table или nil | последнее prediction-состояние |
+| `z.engine.prestate()` | table | последнее prediction-состояние |
+| `z.engine.predict_state([cmd])` | table | выполнить prediction и вернуть снимок |
 | `z.engine.predict(fn[, cmd])` | true | выполнить callback в prediction |
 
 `client_cmd` выполняет команду сразу. Это не movement API: доступны `quit`,
 `disconnect`, `bind` и любые другие клиентские команды.
 
+`predict_state` — синхронный вариант: запускает `g_prediction.simulate()` и
+возвращает снимок предсказанного локального pawn. Поля: `predicted`, `health`,
+`team`, `flags`, `on_ground`, `ducking`, `origin`, `eye_position`, `velocity`,
+`abs_velocity`, `sim_time`. Без `cmd` работает только в `create_move`.
+
 `predict` без `cmd` работает только внутри `create_move`. Вне его передай
 временный `cmd` явно. Вложенный prediction запрещён. Callback получает
 предсказанное состояние через `z.entitylist.local_player()` и `prestate`.
+Алиас: `z.engine.simulate()`.
 
-`prestate()` содержит `flags`, `on_ground`, `ducking`, `surface_friction`,
-`stamina`, `velocity`, `origin` и другие поля prediction-состояния; точный
-набор зависит от движка.
+`prestate()` всегда возвращает таблицу: `flags`, `on_ground`, `ducking`,
+`networked_velocity`, `velocity`, `origin`, `networked_origin`,
+`last_movement_impulses`, `surface_friction`, `stamina`. До первого
+`simulate()` значения нулевые.
 
 ## z.render
 
@@ -553,9 +561,11 @@ local image, err = z.assets.load_svg(svg_text[, scale])
 local font, err = z.assets.load_font(path, size[, atlas_w, atlas_h])
 ```
 
-Алиас `z.assets.image()` = `load_image()`. Относительный путь проверяется от
-папки скриптов, затем от рабочей папки; абсолютный принимается как есть.
-Ассеты могут читаться вне папки скриптов. Загрузка синхронная.
+Алиасы: `z.assets.image()` = `load_image()`, `z.assets.svg()` = `load_svg()`,
+`z.assets.font()` = `load_font()`. В `load_image` параметр `scale` учитывается
+только для `.svg`; для растровых форматов он игнорируется. Относительный путь
+проверяется от папки скриптов, затем от рабочей папки; абсолютный принимается
+как есть. Ассеты могут читаться вне папки скриптов. Загрузка синхронная.
 
 `image`:
 

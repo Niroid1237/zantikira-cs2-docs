@@ -56,6 +56,8 @@ local icon = z.assets.load_svg([[
 
 Загружает SVG из строки. Возвращает `image` или `nil, error`.
 
+Алиас: `z.assets.svg()`.
+
 ## z.assets.load_font(path, size[, atlas_w, atlas_h])
 
 ```lua
@@ -77,6 +79,8 @@ z.render.text(20, 20, "custom font", { r = 255, g = 255, b = 255, a = 255 }, fon
 
 Возвращает `font` или `nil, error`. Размер и размеры атласа должны быть
 положительными.
+
+Алиас: `z.assets.font()`.
 
 ### font
 
