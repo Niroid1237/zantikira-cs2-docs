@@ -12,18 +12,18 @@ API для CS2-чита ZantiKira. Скрипты запускаются тол�
 
 ## Что уже доступно
 
-| Раздел | Возможности |
+| Section | Features |
 |---|---|
-| [События](api/events.md) | `create_move`, `paint`, `ui`, `shutdown` |
-| [cmd](api/command.md) | кнопки, view angles, forward/left/up move, номер команды, tick |
-| [Сущности](api/entitylist.md) | снимки локального игрока и живых игроков, motion-история по тикам |
-| [trace](api/trace.md) | луч и hull с fraction, позицией, нормалью и индексом игрока |
-| [engine](api/engine.md) | `is_connected`, `is_in_game`, `client_cmd` |
-| [Математика](api/math.md) | векторы, углы, FOV, distance |
-| [Рендер](api/render.md) | прямоугольники, линии, круги, текст, `world_to_screen`, размеры экрана |
-| [Окна](api/ui.md) | ImGui-подобные окна, checkbox, slider, combo, text input, кнопки |
-| [Настройки](api/settings.md) | чтение и запись primitive-настроек по `category, name` |
-| [Глобальные таблицы](api/globals.md) | `z.api`, `z.globals`, `z.time`, `z.buttons`, `z.log`, `print` |
+| [Events](api/events.md) | `create_move`, `paint`, `ui`, `shutdown` |
+| [Command](api/command.md) | кнопки, view angles, forward/left/up move, номер команды, tick |
+| [Entity list](api/entitylist.md) | снимки локального игрока и живых игроков, motion-история по тикам |
+| [Trace](api/trace.md) | луч и hull с fraction, позицией, нормалью и индексом игрока |
+| [Engine](api/engine.md) | `is_connected`, `is_in_game`, `client_cmd` |
+| [Math](api/math.md) | векторы, углы, FOV, distance |
+| [Render](api/render.md) | прямоугольники, линии, круги, текст, `world_to_screen`, размеры экрана |
+| [UI](api/ui.md) | ImGui-подобные окна, checkbox, slider, combo, text input, кнопки |
+| [Settings](api/settings.md) | чтение и запись primitive-настроек по `category, name` |
+| [Globals](api/globals.md) | `z.api`, `z.globals`, `z.time`, `z.buttons`, `z.log`, `print` |
 | FFI | `require("ffi")` только при включённом чекбоксе |
 
 ## Быстрый старт
@@ -54,7 +54,7 @@ z.events.ui:add(function()
 end)
 ```
 
-Подробно: [установка](start/installation.md) и [быстрый старт](start/quickstart.md).
+Подробно: [Installation](start/installation.md) и [Quickstart](start/quickstart.md).
 
 ## Порядок вызова
 
