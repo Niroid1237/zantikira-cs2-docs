@@ -856,6 +856,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Редактор в меню
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#zscriptsreload" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -889,7 +900,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Список скриптов через настройки
@@ -900,7 +911,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         Ограничения
@@ -1089,6 +1100,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Редактор в меню
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#zscriptsreload" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1122,7 +1144,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Список скриптов через настройки
@@ -1133,7 +1155,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         Ограничения
@@ -1167,6 +1189,21 @@
 <p><code>z.scripts</code> управляет загрузкой скриптов из Lua и даёт доступ к папке скриптов.
 Список по-прежнему хранится только в активном конфиге; автоматического
 сканирования папки нет.</p>
+<h2 id="_1">Редактор в меню<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Во вкладке <strong>Lua</strong> → <strong>Scripts</strong> есть кнопка <strong>new</strong> и кнопка <strong>edit</strong> в каждой
+строке списка. Они открывают полноэкранный редактор с подсветкой синтаксиса:</p>
+<ul>
+<li><strong>new</strong> создаёт новый файл из шаблона; имя можно изменить до сохранения;</li>
+<li><strong>edit</strong> загружает содержимое существующего скрипта;</li>
+<li><strong>save</strong> записывает файл, <strong>save + reload</strong> дополнительно перезагружает все
+  скрипты;</li>
+<li><strong>discard</strong> закрывает редактор без сохранения;</li>
+<li><code>Ctrl+S</code> — сохранить, <code>Ctrl+Enter</code> — сохранить и перезагрузить.</li>
+</ul>
+<p>Новый файл при сохранении добавляется в <code>lua.script list</code> и включается. Путь
+проверяется теми же правилами, что и для списка: только <code>.lua</code>, только внутри
+папки скриптов. Редактор сохраняет текст в UTF-8 с LF и пробелами: CRLF
+нормализуется, BOM убирается, табы заменяются на четыре пробела.</p>
 <h2 id="zscriptsreload">z.scripts.reload()<a class="headerlink" href="#zscriptsreload" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">z</span><span class="p">.</span><span class="py">scripts</span><span class="p">.</span><span class="nf">reload</span><span class="p">()</span>
 </code></pre></div>
@@ -1196,7 +1233,7 @@
 </code></pre></div>
 <p>Открывает папку скриптов в Проводнике. Возвращает <code>nil</code>. Вызов выполняется
 синхронно и не проверяет, что Проводник действительно открылся.</p>
-<h2 id="_1">Список скриптов через настройки<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Список скриптов через настройки<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>Список — custom-поле <code>lua.script list</code>. Его можно прочитать и заменить как
 JSON-совместимую таблицу:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">local</span><span class="w"> </span><span class="nv">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">z</span><span class="p">.</span><span class="py">settings</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="s2">"lua"</span><span class="p">,</span><span class="w"> </span><span class="s2">"script list"</span><span class="p">)</span>
@@ -1217,7 +1254,7 @@ JSON-совместимую таблицу:</p>
 </code></pre></div>
 <p>Смена <code>lua scripts</code> или <code>lua ffi</code> перезагружает рантайм на ближайшем
 <code>on_present</code>, потому что меняется набор открытых библиотек.</p>
-<h2 id="_2">Ограничения<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_3">Ограничения<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>reload()</code> не принимает путь и не загружает отдельный файл. Он перезагружает
   весь список активного конфига.</li>
